@@ -1,0 +1,54 @@
+name: Deploy flipchat-server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '16.20.2' # Matches VPS version
+      #     cache: 'npm'
+
+      - name: Create .env from data.txt
+        run: |
+          if [ -s data.txt ]; then
+            cat data.txt > .env
+          else
+            echo "Error: data.txt is empty or missing"
+            exit 1
+          fi
+
+      - name: Deploy to VPS
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: "flipchat"
+          VPS_DEST: "/home/flipchat/flipchat-link/flipchat-server"
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key
+          chmod 600 private_key
+          rsync -avz --exclude '.git' -e "ssh -i private_key -o StrictHostKeyChecking=no" ./ $VPS_USER@$VPS_HOST:$VPS_DEST/
+          ssh -i private_key -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+            cd /home/flipchat/flipchat-link/flipchat-server
+            echo "Deploying to: $(pwd)"
+            npm install
+            pm2 restart flipchat-server || pm2 start server.js --name "flipchat-server"
+            pm2 save
+            echo "PM2 status:"
+            pm2 list
+            echo "Recent logs:"
+            tail -n 10 /home/flipchat/.pm2/logs/flipchat-server-out.log > logs.txt 2>/dev/null || echo "No output logs yet"
+            tail -n 10 /home/flipchat/.pm2/logs/flipchat-server-error.log >> logs.txt 2>/dev/null || echo "No error logs yet"
+            cat logs.txt
+            rm logs.txt
+          EOF
+          rm private_key

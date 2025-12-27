@@ -1,0 +1,49 @@
+name: Deploy flipchat-client
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: '16.20.2'
+      #     cache: 'npm'
+
+      - name: Create .env.local from data.txt
+        run: |
+          if [ -s data.txt ]; then
+            cat data.txt > .env.local
+          else
+            echo "Error: data.txt is empty or missing"
+            exit 1
+          fi
+
+      - name: Deploy to VPS
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: "flipchat"
+          VPS_WORK_DIR: "/home/flipchat/flipchat-link/flipchat-client"
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key
+          chmod 600 private_key
+          rsync -avz --exclude '.git' -e "ssh -i private_key -o StrictHostKeyChecking=no" ./ "$VPS_USER@$VPS_HOST:$VPS_WORK_DIR/" || { echo "rsync failed"; exit 1; }
+          ssh -i private_key -o StrictHostKeyChecking=no "$VPS_USER@$VPS_HOST" << 'EOF'
+            cd /home/flipchat/flipchat-link/flipchat-client
+            npm install || { echo "npm install failed"; exit 1; }
+            npm run build || { echo "npm build failed"; exit 1; }
+            rsync -avz --delete ./dist/ /var/www/html/dist/ || { echo "rsync dist failed"; exit 1; }
+            sudo -n nginx -t || { echo "Nginx config test failed"; cat /var/log/nginx/error.log; exit 1; }
+            sudo -n systemctl reload nginx || { echo "Nginx reload failed"; exit 1; }
+            ls -l /var/www/html/dist/  # Debug: Show deployed files
+          EOF
+          rm private_key || { echo "Failed to remove private_key"; exit 1; }
