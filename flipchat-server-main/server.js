@@ -90,7 +90,7 @@ app.use("/api/payment", PaymentRoutes);
 app.use("/api/transaction", TransactionRoutes);
 app.use("/api/analytics", AnalyticsRoutes)
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   mongoose.connection.once("open", () => {
     console.log("Connected To DB");
     console.log(`server running on port ${PORT}`);
