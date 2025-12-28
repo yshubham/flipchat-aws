@@ -48,8 +48,13 @@ const Login = () => {
 
       if (res.data) {
         toast.success(res.data?.message);
+        // Store user with access token
+        const userData = {
+          ...res.data?.user,
+          accessToken: res.data?.accessToken
+        };
         setTimeout(() => {
-          handleSetUser(res.data?.user);
+          handleSetUser(userData);
           navigate("/dashboard");
         }, 1000);
       }
@@ -100,8 +105,13 @@ const Login = () => {
       );
       if (res.data) {
         toast.success(res.data?.message);
+        // Store user with access token
+        const userData = {
+          ...res.data?.user,
+          accessToken: res.data?.accessToken
+        };
         setTimeout(() => {
-          handleSetUser(res.data?.user);
+          handleSetUser(userData);
           navigate("/dashboard");
         }, 1000);
       }

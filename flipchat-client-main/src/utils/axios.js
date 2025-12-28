@@ -1,5 +1,6 @@
 import axios from "axios";
 import mem from "mem";
+import { STORAGE_NAME } from "../context/AuthContext";
 
 const SERVER_URL = import.meta.env.VITE_APP_SERVER_URL;
 
@@ -9,18 +10,41 @@ export const axiosPublic = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
+
+// Get access token from localStorage
+const getAccessToken = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem(STORAGE_NAME));
+    return user?.accessToken || null;
+  } catch (e) {
+    return null;
+  }
+};
 
 // refresh jwt
 export const refresh = async () => {
   try {
-    const res = await axiosPublic.get("refresh", {
+    const res = await axiosPublic.get("/api/auth/refresh", {
       withCredentials: true,
     });
-    console.log("res - ", res);
+    if (res.data?.accessToken) {
+      // Update access token in localStorage
+      const user = JSON.parse(localStorage.getItem(STORAGE_NAME));
+      if (user) {
+        user.accessToken = res.data.accessToken;
+        localStorage.setItem(STORAGE_NAME, JSON.stringify(user));
+      }
+      return res.data.accessToken;
+    }
+    return null;
   } catch (e) {
-    console.log(e);
+    console.log("Refresh token error:", e);
     // if refresh token expired, logout the user and clear cookies
+    localStorage.removeItem(STORAGE_NAME);
+    window.location.href = "/login";
+    return null;
   }
 };
 
@@ -32,16 +56,21 @@ export const memoizedRefreshJwt = mem(refresh, {
 // axios private instance
 export const axiosPrivate = axios.create({
   baseURL: SERVER_URL,
+  withCredentials: true,
 });
 
 // axios interceptors request
 axiosPrivate.interceptors.request.use(
   async (config) => {
-    // if access token, add to headers
-    config.headers = {
-      ...config.headers,
-      Authorization: `Bearer access-token`,
-    };
+    // Get access token from localStorage
+    const accessToken = getAccessToken();
+    
+    if (accessToken) {
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${accessToken}`,
+      };
+    }
 
     return config;
   },
@@ -57,17 +86,21 @@ axiosPrivate.interceptors.response.use(
     if (error?.response?.status === 401 && !config?.sent) {
       config.sent = true;
 
-      const result = await memoizedRefreshJwt();
+      const newAccessToken = await memoizedRefreshJwt();
 
-      if(result) {
+      if (newAccessToken) {
         config.headers = {
-            ...config.headers,
-            Authorization: `Bearer access-token`,
-          };
+          ...config.headers,
+          Authorization: `Bearer ${newAccessToken}`,
+        };
+        return axiosPrivate(config);
+      } else {
+        // Refresh failed, redirect to login
+        localStorage.removeItem(STORAGE_NAME);
+        window.location.href = "/login";
+        return Promise.reject(error);
       }
-
-      return axiosPrivate(config)
     }
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
 );
