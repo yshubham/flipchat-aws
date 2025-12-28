@@ -1,0 +1,61 @@
+version: 0.2
+
+env:
+  variables:
+    EC2_DNS: "ec2-13-232-189-147.ap-south-1.compute.amazonaws.com"   # ← REPLACE
+    S3_BUCKET: "flipchat-frontend"                           # ← REPLACE
+    CLOUDFRONT_ID: "ETDQT30AMFQST"                                # ← REPLACE
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Installing dependencies..."
+      - cd backend && npm ci --production && cd ..
+      - cd frontend && npm ci && cd ..
+
+  build:
+    commands:
+      # Detect changed folders
+      - |
+        CHANGED_FILES=$(git diff --name-only $CODEBUILD_PREVIOUS_COMMIT $CODEBUILD_SOURCE_VERSION 2>/dev/null || echo "all")
+        echo "Changed files: $CHANGED_FILES"
+
+      # Backend deploy (if changed)
+      - |
+        if echo "$CHANGED_FILES" | grep -q "^backend/" || [ "$CHANGED_FILES" = "all" ]; then
+          echo "Deploying backend to EC2..."
+          mkdir -p ~/.ssh
+          aws ssm get-parameter --name "/flipchat/deploy/ssh-private-key" --with-decryption --query Parameter.Value --output text > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $EC2_DNS >> ~/.ssh/known_hosts 2>/dev/null
+
+          ssh -o StrictHostKeyChecking=no ubuntu@$EC2_DNS << 'EOF'
+            set -e
+            cd /home/ubuntu/flipchat
+            git pull origin main
+            cd backend
+            npm install --production
+            cd ..
+            pm2 restart flipchat-api || pm2 start backend/server.js --name flipchat-api
+            pm2 save
+            echo "Backend deployed!"
+          EOF
+        else
+          echo "No backend changes — skipping"
+        fi
+
+      # Frontend deploy (if changed)
+      - |
+        if echo "$CHANGED_FILES" | grep -q "^frontend/" || [ "$CHANGED_FILES" = "all" ]; then
+          echo "Building and deploying frontend..."
+          cd frontend
+          npm run build
+          cd ..
+          aws s3 sync frontend/dist/ s3://$S3_BUCKET --delete
+          aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_ID --paths "/*"
+          echo "Frontend deployed!"
+        else
+          echo "No frontend changes — skipping"
+        fi

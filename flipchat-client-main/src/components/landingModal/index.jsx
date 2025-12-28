@@ -5,6 +5,7 @@ import CheckIcon from "../../assets/check.svg";
 import CrossIcon from "../../assets/cross.svg";
 import CopyIcon from "../../assets/icon_copy.svg";
 import { Tooltip } from "react-tooltip";
+import { BASE_URL } from "../../utils/utils";
 
 const LandingModal = ({
   handleCloseModal,
@@ -15,7 +16,7 @@ const LandingModal = ({
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   const copyToClpboard = () => {
-    navigator.clipboard.writeText(`flipchat.link/${unknownLink}`);
+    navigator.clipboard.writeText(`${BASE_URL}/${unknownLink}`);
     setTooltipOpen(true);
 
     setTimeout(() => {
@@ -36,7 +37,7 @@ const LandingModal = ({
         <h3 className="landingModal-title">This is your WhatsApp short link</h3>
         <p className="landingModal-para">
           Copy and share it anywhere you want to be contacted instantly. (Use
-          flipchat.link/{unknownLink ?? "abcd"} to send the message)
+          {BASE_URL}/{unknownLink ?? "abcd"} to send the message)
         </p>
         <div className="landingModal-highlight">
           <img
@@ -44,8 +45,8 @@ const LandingModal = ({
             alt="whatsapp icon"
             className="landingModal-highlight-image"
           />
-          <h3 className="landingModal-highlight-text" title={`flipchat.link/${unknownLink}`}>
-            flipchat.link/{unknownLink}
+          <h3 className="landingModal-highlight-text" title={`${BASE_URL}/${unknownLink}`}>
+            {BASE_URL}/{unknownLink}
           </h3>
           <img
             src={CopyIcon}

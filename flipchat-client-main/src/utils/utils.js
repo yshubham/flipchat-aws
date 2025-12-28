@@ -144,6 +144,10 @@ export const countries = [
 // Server URL
 export const SERVER_URL = import.meta.env.VITE_APP_SERVER_URL;
 
+// Base URL for displaying links (without trailing slash)
+// This is the public IP or domain where the backend redirect service is hosted
+export const BASE_URL = import.meta.env.VITE_APP_BASE_URL || window.location.origin.replace(/\/$/, '');
+
 // get last 12 months 
 export function getLast12Months() {
   const months = [];

@@ -7,7 +7,7 @@ import EditIcon from "../assets/icon_edit.svg";
 import QRIcon from "../assets/icon_qr.svg";
 import { Tooltip } from "react-tooltip";
 import axios from "axios";
-import { PLANS, SERVER_URL } from "../utils/utils";
+import { PLANS, SERVER_URL, BASE_URL } from "../utils/utils";
 import { toast, Toaster } from "sonner";
 import { useAuthContext } from "../context/AuthContext";
 import dayjs from "dayjs";
@@ -34,7 +34,7 @@ const LinkAnalytics = () => {
   const navigate = useNavigate();
 
   const copyToClpboard = () => {
-    navigator.clipboard.writeText(`flipchat.link/${currentLink?.username}`);
+    navigator.clipboard.writeText(`${BASE_URL}/${currentLink?.username}`);
     setTooltipOpen(true);
 
     setTimeout(() => {
@@ -88,7 +88,7 @@ const LinkAnalytics = () => {
 
   // handle submit qr modal
   const handleSubmitQr = () => {
-    navigator.clipboard.writeText(`flipchat.link/${currentLink?.username}`);
+    navigator.clipboard.writeText(`${BASE_URL}/${currentLink?.username}`);
     setGeneratedQR("");
     toast.success("copied to clipboard", {
       duration: 1000,
@@ -139,7 +139,7 @@ const LinkAnalytics = () => {
     <div className="qr-modal-content">
       <h3 className="qr-modal-title">Scan The QR Code</h3>
       <img src={generatedQR} alt="qr code" className="qr-modal-img" />
-      <p className="qr-modal-text">{`flipchat.link/${currentLink?.username}`}</p>
+      <p className="qr-modal-text">{`${BASE_URL}/${currentLink?.username}`}</p>
     </div>
   );
 
@@ -240,7 +240,7 @@ const LinkAnalytics = () => {
                   data-tooltip-content="generate qr code"
                   data-tooltip-delay-show={200}
                   onClick={() =>
-                    generateQR(`flipchat.link/${currentLink?.username}`)
+                    generateQR(`${BASE_URL}/${currentLink?.username}`)
                   }
                 >
                   <img

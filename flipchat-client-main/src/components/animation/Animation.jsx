@@ -142,7 +142,7 @@ const Animation = () => {
     <>
       <div className="animationCard">
         <div className="animationContainer">
-          <p className="animationLink" onClick={handleLinkClick}>flipchat.link/YourBrand</p>
+          <p className="animationLink" onClick={handleLinkClick}>{window.location.origin}/YourBrand</p>
           <div
             ref={iconRef}
             id="icon"

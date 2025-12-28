@@ -16,7 +16,7 @@ import { useFormik } from "formik";
 import * as yup from "yup";
 import axios from "axios";
 import { toast, Toaster } from "sonner";
-import { countries, phoneRegExp } from "../utils/utils";
+import { countries, phoneRegExp, BASE_URL } from "../utils/utils";
 import LandingModal from "../components/landingModal";
 import Spinner from "../components/spinner"
 
@@ -178,7 +178,7 @@ const Landing = () => {
     setIsMenuMobile(false)
   }
 
-  const currentHost = window.location?.href ?? "https://app.flipchat.link/"
+  const currentHost = window.location?.href ?? BASE_URL
 
 
   return (
@@ -404,7 +404,7 @@ const Landing = () => {
                   </div>
                   <div className="brandcheck-body">
                     <h3 className="brandcheck-title">
-                      🎉 flipchat.link/{brandName} 🎉{" "}
+                      🎉 {BASE_URL}/{brandName} 🎉{" "}
                       <span className="brandcheck-title-sub">
                         is available as a Premium Link.
                       </span>{" "}
@@ -434,7 +434,7 @@ const Landing = () => {
                   </div>
                   <div className="brandcheck-body">
                     <h3 className="brandcheck-found-title">
-                      😭 flipchat.link/{brandName} 😭{" "}
+                      😭 {BASE_URL}/{brandName} 😭{" "}
                       <span className="brandcheck-found-title-sub">
                         is not available. Please try another brand.
                       </span>{" "}

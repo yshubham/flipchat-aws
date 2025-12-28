@@ -1,4 +1,5 @@
 import asyncHandler from "express-async-handler";
+import dotenv from "dotenv";
 import ShortLink from "../models/ShortLink.js";
 import { PLANS } from "../utils/constants.js";
 import {
@@ -11,6 +12,13 @@ import {
 import requestIp from "request-ip";
 import Analytics from "../models/Analytics.js";
 import moment from "moment";
+
+dotenv.config();
+
+// Default to public IP if CLIENT_BASE_URL is not set
+// IMPORTANT: Replace YOUR_PUBLIC_IP:5173 with your actual public IP and frontend port
+// Example: "http://203.0.113.1:5173" or "http://54.123.45.67:5173"
+const CLIENT_BASE_URL = process.env.CLIENT_BASE_URL || "http://YOUR_PUBLIC_IP:5173";
 
 // redirect link - GET
 export const redirectLink = asyncHandler(async (req, res) => {
@@ -37,8 +45,9 @@ export const redirectLink = asyncHandler(async (req, res) => {
 
 
   if (!link) {
-    // redirect to app.flipchat.link
-    return res.redirect("app.flipchat.link");
+    // redirect to client base URL
+    const clientUrl = CLIENT_BASE_URL.replace(/\/$/, '');
+    return res.redirect(clientUrl);
   }
 
   // find link
@@ -154,5 +163,6 @@ export const redirectLink = asyncHandler(async (req, res) => {
 
 // redirect to client - GET
 export const redirectToClient = asyncHandler(async (req, res) => {
-  return res.redirect("http://app.flipchat.link");
+  const clientUrl = CLIENT_BASE_URL.replace(/\/$/, '');
+  return res.redirect(clientUrl);
 });

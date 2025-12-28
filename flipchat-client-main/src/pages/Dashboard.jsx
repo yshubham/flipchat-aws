@@ -6,7 +6,7 @@ import axios from "axios";
 import { useAuthContext } from "../context/AuthContext";
 import Warning from "../components/common/Warning";
 import Loader from "../components/loader";
-import { PLANS } from "../utils/utils";
+import { PLANS, BASE_URL } from "../utils/utils";
 import HamburgerIcon from "../assets/hamburger.svg";
 import { useSidebarContext } from "../context/SidebarContext";
 
@@ -132,7 +132,7 @@ const Dashboard = () => {
                     onClick={() => handleNavigateLink(item?._id)}
                   >
                     <h3 className="dashboard-grid-item-link">
-                      flipchat.link/{item?.username}
+                      {BASE_URL}/{item?.username}
                     </h3>
                     <p className="dashboard-grid-item-message">
                       {item?.message ? `${item?.message}`: <span className="link-no-message">no message to preview</span>}
