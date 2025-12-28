@@ -2,9 +2,10 @@ PORT=3000
 MONGO_URI=mongodb+srv://flipchat:mint@flipchat.gpbmt.mongodb.net/?retryWrites=true&w=majority&appName=Flipchat
 GOOGLE_CLIENT_ID=420250340652-jltkqohqltqaf0ajf03tnm8ujt2q9a3j.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=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
-CLIENT_URL=https://google.com
+SERVER_BASE_URL=https://pbhfinal.shop
+CLIENT_BASE_URL=https://pbhfinal.shop
+CORS_ORIGIN=https://pbhfinal.shop
 SESSION_SECRET="keyboard_cat"
-CLIENT_URL=http://localhost:5173
 ACCESS_TOKEN_SECRET=f4d47f0d05ccab9f0ef1d30d67c49725256aea3474a63dc5f26fc174610bfeac49818b58f03de222dae8f3065ce0912379cfe127f1580c058594da7f99cfde91
 REFRESH_TOKEN_SECRET=b1bccc4ab5231342fce398102c7e3a0b253899cc51214f2d1e011793d107c03e9d2c242b535071f9ee5235d95ce717a6f3b8cd795685c647f4b4f6fc16c47d3a
 USER_MAIL='inflipchat@gmail.com'

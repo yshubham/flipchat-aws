@@ -15,10 +15,8 @@ import moment from "moment";
 
 dotenv.config();
 
-// Default to public IP if CLIENT_BASE_URL is not set
-// IMPORTANT: Replace YOUR_PUBLIC_IP:5173 with your actual public IP and frontend port
-// Example: "http://203.0.113.1:5173" or "http://54.123.45.67:5173"
-const CLIENT_BASE_URL = process.env.CLIENT_BASE_URL || "http://YOUR_PUBLIC_IP:5173";
+// Default to domain if CLIENT_BASE_URL is not set
+const CLIENT_BASE_URL = process.env.CLIENT_BASE_URL || "https://pbhfinal.shop";
 
 // redirect link - GET
 export const redirectLink = asyncHandler(async (req, res) => {
